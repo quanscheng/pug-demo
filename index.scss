@@ -1,172 +1,191 @@
+@import url("https://fonts.googleapis.com/css2?family=Lobster&display=swap");
+
 body {
   margin: 0;
 }
+
 main {
+  --text: "404";
+  --hue: 220deg;
+  --spin: 25deg;
+  --light-color: #ffeab1;
+  --perspective: 80vmin;
+  --stripe: 0.3em;
+  --stripe-angle: -35deg;
+
   width: 100%;
   height: 100%;
-  overflow: hidden;
-  position: relative;
 
-  &::before {
-    content: "";
-    position: absolute;
+  height: 100vh;
+  background-color: #333;
+  font-family: Lobster, "Trebuchet MS", "Lucida Sans Unicode", "Lucida Grande", "Lucida Sans", Arial,
+    sans-serif;
+
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  background-image: linear-gradient(to bottom, #383838, #3c3c3c 50%, #2f2f2f 60%, #0b0e13);
+  font-size: 17.5vmin;
+
+  .light {
     display: block;
-    width: 100%;
-    height: 100%;
+    position: absolute;
     top: 0;
-    left: 0;
+    left: 50%;
+    width: 90%;
+    height: 60%;
+    min-height: 6em;
+    transform: translateX(-50%) translateY(-1em);
     z-index: 1;
-    animation: color-switch 20s cubic-bezier(0.3, 0, 0.7, 1) both infinite;
     mix-blend-mode: screen;
+    filter: blur(0.15em);
+    opacity: 0.6;
+
+    &::before {
+      content: "";
+      display: block;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-image: linear-gradient(to bottom, var(--light-color), transparent);
+      clip-path: polygon(25% 0, 75% 0, 100% 100%, 0% 100%);
+      border-radius: 0 0 1em 1em;
+    }
   }
 
-  .star-wrapper {
-    position: absolute;
-    width: 100%;
-    height: 100%;
+  figure {
+    display: block;
     position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transform-style: preserve-3d;
+    perspective: var(--perspective);
 
-    .star {
-      --hue: 0;
-      --brightness: 80%;
-      position: absolute;
-      width: 2px;
-      height: 2px;
-      border-radius: 2px;
-      background-color: hsl(var(--hue), 10%, var(--brightness));
+    span {
+      display: block;
 
-      @for $i from 1 through 100 {
-        &:nth-child(#{$i}) {
-          top: random() * 100%;
-          left: random() * 100%;
-          --hue: #{random() * 360}deg;
-          --brightness: #{10% + random() * 60%};
+      &::before {
+        text-align: center;
+        content: var(--text);
+        white-space: pre;
+        display: block;
+      }
+    }
+
+    .text {
+      animation: rotate 3s ease-in-out infinite both alternate;
+      transform-style: preserve-3d;
+      position: relative;
+
+      span {
+        transform-style: preserve-3d;
+        position: absolute;
+        top: 0;
+        left: 0;
+
+        &:first-child {
+          position: static;
+          animation: shine 3s linear infinite;
+        }
+
+        @for $i from 1 through 20 {
+          &:nth-child(#{$i}) {
+            &::before {
+              transform: translateZ(#{$i * -0.01}em);
+              color: hsl(var(--hue), #{60% - $i * 1%}, #{80% - $i * 2.5%});
+            }
+          }
         }
       }
     }
-  }
 
-  .sun-wrapper {
-    --size: 50vmin;
-    width: 100%;
-    height: 100%;
-    overflow: hidden;
-    position: absolute;
-    top: 0;
-    left: 0;
-
-    &.blur {
-      filter: blur(3vmin);
-      mix-blend-mode: screen;
-    }
-
-    .sun,
-    .moon {
+    .shadow {
+      display: flex;
+      align-items: center;
+      justify-content: center;
       position: absolute;
-      width: var(--size);
-      height: var(--size);
-      border-radius: var(--size);
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
+      transform-style: preserve-3d;
+      perspective: var(--perspective);
+      width: 90vw;
+      height: 90vw;
+      font-size: 1em;
+      transform: translate3D(0, 2em, 0) rotateX(90deg);
+      opacity: 0.9;
+      backface-visibility: hidden;
+
+      &::after {
+        content: "";
+        display: block;
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-image: radial-gradient(closest-side, var(--light-color), transparent);
+        transform: translateY(1px);
+        z-index: 0;
+        mix-blend-mode: screen;
+        opacity: 0.5;
+      }
+
+      &::before {
+        filter: blur(4px);
+        opacity: 0.8;
+
+        // safari doesn't support filter over 3d-transform elements
+        @media not all and (min-resolution: 0.001dpcm) {
+          filter: none;
+          opacity: 0.6;
+        }
+        animation: rotate-shadow 3s ease-in-out infinite both alternate;
+        z-index: 1;
+      }
     }
-
-    .sun {
-      background-color: gold;
-      animation: flare 20s cubic-bezier(0.3, 0, 0.7, 1) both infinite;
-    }
-
-    .moon {
-      width: calc(var(--size) + 1vmin);
-      height: calc(var(--size) + 1vmin);
-      background-color: black;
-      animation: eclipse 20s cubic-bezier(0.3, 0, 0.7, 1) both infinite;
-      animation-name: eclipse, reflect;
-    }
   }
 }
 
-@keyframes eclipse {
-  0% {
-    transform: translate(calc(-50% + 80vw), 0%);
+@keyframes rotate {
+  from {
+    transform: rotate3D(0, 1, 0, calc(var(--spin) * -1)) rotateX(30deg);
   }
 
-  50% {
-    transform: translate(-50%, -50%);
-  }
-
-  100% {
-    transform: translate(calc(-50% - 80vw), -100%);
+  to {
+    transform: rotate3D(0, 1, 0, var(--spin)) rotateX(30deg);
   }
 }
 
-@keyframes flare {
-  0% {
-    box-shadow: 0px 0px 5vmin gold;
-    background-color: gold;
+@keyframes rotate-shadow {
+  from {
+    transform: rotateZ(var(--spin));
   }
 
-  25% {
-    box-shadow: 0px 0px 5vmin gold;
-    background-color: gold;
-  }
-
-  50% {
-    box-shadow: 0px 0px 10vmin orangered;
-    background-color: orangered;
-  }
-
-  75% {
-    box-shadow: 0px 0px 5vmin gold;
-    background-color: gold;
-  }
-
-  100% {
-    box-shadow: 0px 0px 5vmin gold;
-    background-color: gold;
+  to {
+    transform: rotateZ(calc(var(--spin) * -1));
   }
 }
 
-@keyframes color-switch {
+@keyframes shine {
   0% {
-    background-color: #002;
+    filter: brightness(1);
   }
 
-  25% {
-    background-color: #002;
+  30% {
+    filter: brightness(1.2);
   }
 
   50% {
-    background-color: #001;
+    filter: brightness(1.4);
   }
 
-  75% {
-    background-color: #002;
-  }
-
-  100% {
-    background-color: #002;
-  }
-}
-
-@keyframes reflect {
-  0% {
-    box-shadow: 4vmin 2vmin 4vmin -6vmin inset gold;
-  }
-
-  25% {
-    box-shadow: 4vmin 2vmin 4vmin -6vmin inset gold;
-  }
-
-  50% {
-    box-shadow: 0vmin 0vmin 4vmin 0vmin inset orangered;
-  }
-
-  75% {
-    box-shadow: -4vmin -2vmin 4vmin -6vmin inset gold;
+  70% {
+    filter: brightness(1.2);
   }
 
   100% {
-    box-shadow: -4vmin -2vmin 4vmin -6vmin inset gold;
+    filter: brightness(1);
   }
 }
